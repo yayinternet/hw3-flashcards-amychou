@@ -55,35 +55,36 @@ class Flashcard {
     if (!this.dragStarted) {
       return;
     }
-
-    event.currentTarget.classList.remove("bounce");
     event.preventDefault();
+
+    // Deactivate bouncing back
+    event.currentTarget.classList.remove("bounce");
+
+    // Flashcard transform
     this.currentX = event.clientX - this.originX;
     this.currentY = event.clientY - this.originY;
     const rotateDeg = 0.2*this.currentX;
     event.currentTarget.style.transform =
-    'translate(' + this.currentX + 'px, ' + this.currentY + 'px)' +
-    ' rotate(' + rotateDeg + 'deg)';
+      'translate(' + this.currentX + 'px, ' + this.currentY + 'px)' +
+      ' rotate(' + rotateDeg + 'deg)';
 
-
+    // Update background color and status depending on current mouse position
     const appContainer = document.querySelector('body');
-    const statusBar = document.querySelector('status');
-    if (this.currentX >= 150){
+    if (this.currentX >= 150) {         // 150 px to the right
       appContainer.style.backgroundColor = "#97b7b7";
-      const correct = document.querySelector('.correct');
       if (!this.correct) {
         this.app.updateStatus(1, 0);
         this.correct = true;
       }
     }
-    else if (this.currentX <= -150) {
+    else if (this.currentX <= -150) {   // 150 px to the left
       appContainer.style.backgroundColor = "#97b7b7";
       if (!this.incorrect){
         this.app.updateStatus(0, 1);
         this.incorrect = true;
       }
     }
-    else {
+    else {                              // In the middle
       appContainer.style.backgroundColor = "#d0e6df";
       if (this.correct) {
         this.app.updateStatus(-1, 0);
