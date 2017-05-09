@@ -1,3 +1,26 @@
 /*
 TODO(you): Write any additional styles you need here.
 */
+
+.flashcard-box .word {
+  animation: slide-in 0.5s;
+}
+
+@keyframes slide-in {
+  from {
+    top: 100%;
+  }
+  to {
+    top: 0%;
+  }
+}
+
+.bounce {
+  animation: bounce-back 0.6s forwards;
+}
+
+@keyframes bounce-back {
+  to {
+    transform: none;
+  }
+}

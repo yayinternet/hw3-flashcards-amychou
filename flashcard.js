@@ -1,21 +1,117 @@
-// TODO(you): Modify the class in whatever ways necessary to implement
-// the flashcard app behavior.
-//
-// You may need to do things such as:
-// - Changing the constructor parameters
-// - Adding methods
-// - Adding additional fields
+/*
+ * Controls the display and interaction behavior of a single flashcard.
+ *
+ * Author: Amy Chou
+ * May 8, 2017
+ */
 
 class Flashcard {
-  constructor(containerElement, frontText, backText) {
+  constructor(containerElement, frontText, backText, app) {
+
     this.containerElement = containerElement;
+    this.app = app;
+    this.word = frontText;
+    this.definition = backText;
 
-    this._flipCard = this._flipCard.bind(this);
-
+    /* Create flashcard object in DOM */
     this.flashcardElement = this._createFlashcardDOM(frontText, backText);
     this.containerElement.append(this.flashcardElement);
 
+    /* Event listeners and binding for actions */
+    this._flipCard = this._flipCard.bind(this);
+    this._dragStart = this._dragStart.bind(this);
+    this._dragMove = this._dragMove.bind(this);
+    this._dragEnd = this._dragEnd.bind(this);
+
     this.flashcardElement.addEventListener('pointerup', this._flipCard);
+    this.flashcardElement.addEventListener('pointerdown', this._dragStart);
+    this.flashcardElement.addEventListener('pointerup', this._dragEnd);
+    this.flashcardElement.addEventListener('pointermove', this._dragMove);
+
+    /* State of flashcard */
+    this.originX = null;
+    this.originY = null;
+    this.currentX = null;
+    this.currentY = null;
+    this.dragStarted = false;
+    this.correct = false;
+    this.incorrect = false;
+
+    this.hide(); // Hide by default
+  }
+
+  destroy() {
+    this.flashcardElement.remove();
+  }
+
+  _dragStart(event) {
+    this.originX = event.clientX;
+    this.originY = event.clientY;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    this.dragStarted = true;
+  }
+
+  _dragMove(event) {
+    if (!this.dragStarted) {
+      return;
+    }
+
+    event.currentTarget.classList.remove("bounce");
+    event.preventDefault();
+    this.currentX = event.clientX - this.originX;
+    this.currentY = event.clientY - this.originY;
+    const rotateDeg = 0.2*this.currentX;
+    event.currentTarget.style.transform =
+    'translate(' + this.currentX + 'px, ' + this.currentY + 'px)' +
+    ' rotate(' + rotateDeg + 'deg)';
+
+
+    const appContainer = document.querySelector('body');
+    const statusBar = document.querySelector('status');
+    if (this.currentX >= 150){
+      appContainer.style.backgroundColor = "#97b7b7";
+      const correct = document.querySelector('.correct');
+      if (!this.correct) {
+        this.app.updateStatus(1, 0);
+        this.correct = true;
+      }
+    }
+    else if (this.currentX <= -150) {
+      appContainer.style.backgroundColor = "#97b7b7";
+      if (!this.incorrect){
+        this.app.updateStatus(0, 1);
+        this.incorrect = true;
+      }
+    }
+    else {
+      appContainer.style.backgroundColor = "#d0e6df";
+      if (this.correct) {
+        this.app.updateStatus(-1, 0);
+        this.correct = false;
+      }
+      if (this.incorrect){
+        this.app.updateStatus(0, -1);
+        this.incorrect = false;
+      }
+    }
+  }
+
+  _dragEnd(event) {
+    this.dragStarted = false;
+    if (this.currentX < 150 && this.currentX > -150) {
+      event.currentTarget.classList.add("bounce");
+    }
+    else {
+      this.app.nextCard(this.correct);
+    }
+  }
+
+  show() {
+    this.flashcardElement.classList.remove('inactive');
+  }
+
+  hide() {
+    this.flashcardElement.classList.add('inactive');
   }
 
   // Creates the DOM object representing a flashcard with the given
