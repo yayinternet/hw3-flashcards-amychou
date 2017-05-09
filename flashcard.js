@@ -103,6 +103,8 @@ class Flashcard {
     }
     else {
       this.app.nextCard(this.correct);
+      const appContainer = document.querySelector('body');
+      appContainer.style.backgroundColor = "#d0e6df";
     }
   }
 
